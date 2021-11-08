@@ -53,6 +53,7 @@ CONST_KEEP_LAST_VERSIONS = 10
 # print debug messages
 DEBUG = False
 
+
 # this class is created for testing
 class Requests:
 
@@ -61,7 +62,8 @@ class Requests:
 
     def bearer_request(self, method, url, auth, **kwargs):
         global DEBUG
-        if DEBUG: print("[debug][funcname]: bearer_request()")
+        if DEBUG:
+            print("[debug][funcname]: bearer_request()")
 
         if DEBUG:
             print('[debug][registry][request]: {0} {1}'.format(method, url))
@@ -74,8 +76,9 @@ class Requests:
 
         res = requests.request(method, url, **kwargs)
         if str(res.status_code)[0] == '2':
-            if DEBUG: print("[debug][registry] accepted")
-            return (res, kwargs['headers']['Authorization'])
+            if DEBUG:
+                print("[debug][registry] accepted")
+            return res, kwargs['headers']['Authorization']
 
         if res.status_code == 401:
             if DEBUG: print("[debug][registry] Access denied. Refreshing token...")
@@ -117,10 +120,10 @@ class Requests:
 
             kwargs['headers']['Authorization'] = 'Bearer {0}'.format(token)
         else:
-            return (res, kwargs['headers']['Authorization'])
+            return res, kwargs['headers']['Authorization']
 
         res = requests.request(method, url, **kwargs)
-        return (res, kwargs['headers']['Authorization'])
+        return res, kwargs['headers']['Authorization']
 
 
 def natural_keys(text):
@@ -158,9 +161,10 @@ def get_error_explanation(context, error_code):
     key = "%s_%s" % (context, error_code)
 
     if key in error_list.keys():
-        return(error_list[key])
+        return error_list[key]
 
     return ''
+
 
 def get_auth_schemes(r,path):
     """ Returns list of auth schemes(lowcased) if www-authenticate: header exists
@@ -182,6 +186,7 @@ def get_auth_schemes(r,path):
         if DEBUG:
             print('[debug][docker] No Auth schemes found')
         return []
+
 
 # class to manipulate registry
 class Registry:
@@ -211,13 +216,12 @@ class Registry:
             (username, password) = login.split(':', 1)
             username = username.strip('"').strip("'")
             password = password.strip('"').strip("'")
-            return (username, password)
+            return username, password
 
-        return (None, None)
-
+        return None, None
 
     @staticmethod
-    def _create(host, login, no_validate_ssl, digest_method = "HEAD"):
+    def _create(host, login, no_validate_ssl, digest_method="HEAD"):
         r = Registry()
 
         (r.username, r.password) = r.parse_login(login)
@@ -234,7 +238,6 @@ class Registry:
     @staticmethod
     def create(*args, **kw):
         return Registry._create(*args, **kw)
-
 
     def send(self, path, method="GET"):
         if 'bearer' in self.auth_schemes:
@@ -334,7 +337,6 @@ class Registry:
 
         print("done")
         return True
-
 
     def list_tag_layers(self, image_name, tag):
         layers_result = self.send("/v2/{0}/manifests/{1}".format(
@@ -850,6 +852,7 @@ def main_loop(args):
         if args.delete_by_hours:
             delete_tags_by_age(registry, image_name, args.dry_run,
                                args.delete_by_hours, keep_tags)
+
 
 if __name__ == "__main__":
     args = parse_args()
